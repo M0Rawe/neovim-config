@@ -58,8 +58,13 @@ local null_ls = require("null-ls")
 null_ls.setup({
 	sources = {
 		null_ls.builtins.formatting.stylua,
-        null_ls.builtins.diagnostics.cppcheck,
+		null_ls.builtins.diagnostics.cppcheck,
 		null_ls.builtins.formatting.clang_format,
 	},
 })
 vim.keymap.set("n", "<leader>gf", vim.lsp.buf.format, {})
+
+-- gitsigns
+require("gitsigns").setup()
+vim.keymap.set("n", "<leader>gs", ":Gitsigns preview_hunk<Cr>", {})
+vim.keymap.set("n", "<leader>gb", ":Gitsigns toggle_current_line_blame<Cr>", {})
