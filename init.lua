@@ -8,6 +8,10 @@ vim.cmd("set shiftwidth=4")
 vim.cmd("set rnu")
 vim.cmd("set mouse=")
 
+-- Search settings
+vim.cmd("set ignorecase")
+vim.cmd("set smartcase")
+
 -- Import lazy nvim config
 require("config.lazy")
 
