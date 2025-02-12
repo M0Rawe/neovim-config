@@ -72,3 +72,33 @@ vim.keymap.set("n", "<leader>gf", vim.lsp.buf.format, {})
 require("gitsigns").setup()
 vim.keymap.set("n", "<leader>gs", ":Gitsigns preview_hunk<Cr>", {})
 vim.keymap.set("n", "<leader>gb", ":Gitsigns toggle_current_line_blame<Cr>", {})
+
+-- run :Lazy update at first daily nvim
+local update_file = vim.fn.stdpath("data") .. "/lazy_last_update"
+
+local function needs_update()
+  if vim.fn.filereadable(update_file) == 0 then
+    vim.fn.writefile({ "0" }, update_file)
+    end
+
+  local last_update = tonumber(vim.fn.readfile(update_file)[1] or "0")
+  local today = tonumber(os.date("%Y%m%d"))
+
+  if last_update < today then
+    vim.fn.writefile({ tostring(today) }, update_file)
+    return true
+  end
+  return false
+end
+
+-- Run `:Lazy update` only if needed
+vim.api.nvim_create_autocmd("VimEnter", {
+  callback = function()
+    if needs_update() then
+      vim.schedule(function()
+        -- Ensure Lazy.nvim is loaded before running update
+        require("lazy").update()
+      end)
+    end
+  end,
+})
