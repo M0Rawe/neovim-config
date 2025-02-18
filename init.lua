@@ -12,6 +12,9 @@ vim.cmd("set mouse=")
 vim.cmd("set ignorecase")
 vim.cmd("set smartcase")
 
+-- Clipboard settings
+vim.opt.clipboard = "unnamedplus"
+
 -- Import lazy nvim config
 require("config.lazy")
 
@@ -52,7 +55,21 @@ require("mason-lspconfig").setup({
 	ensure_installed = { "clangd", "lua_ls" },
 })
 require("lspconfig").lua_ls.setup({})
-require("lspconfig").clangd.setup({})
+require'lspconfig'.clangd.setup{
+    cmd = {"clangd", "--compile-commands-dir=/Users/Morawe/Flipper/Momentum-Firmware/build/f7-firmware-C"},
+    filetypes = {"c", "cpp", "objc", "objcpp"},
+    root_dir = require'lspconfig'.util.root_pattern("compile_commands.json", ".git"),
+    init_options = {
+        clangdFileStatus = true,
+        -- Manually add include paths if not using compile_commands.json
+        clangd = {
+            compilationDatabaseDirectory = "/Users/morawe/Flipper/Momentum-Firmware",
+            extraArgs = {
+                "-I/Users/morawe/Flipper/Momentum-Firmware/furi/include",  -- Adjusted include path
+            },
+        },
+    }
+}
 vim.keymap.set("n", "K", vim.lsp.buf.hover, {})
 vim.keymap.set("n", "gd", vim.lsp.buf.definition, {})
 vim.keymap.set({ "n", "v" }, "<leader>ca", vim.lsp.buf.code_action, {})
@@ -77,28 +94,28 @@ vim.keymap.set("n", "<leader>gb", ":Gitsigns toggle_current_line_blame<Cr>", {})
 local update_file = vim.fn.stdpath("data") .. "/lazy_last_update"
 
 local function needs_update()
-  if vim.fn.filereadable(update_file) == 0 then
-    vim.fn.writefile({ "0" }, update_file)
-    end
+	if vim.fn.filereadable(update_file) == 0 then
+		vim.fn.writefile({ "0" }, update_file)
+	end
 
-  local last_update = tonumber(vim.fn.readfile(update_file)[1] or "0")
-  local today = tonumber(os.date("%Y%m%d"))
+	local last_update = tonumber(vim.fn.readfile(update_file)[1] or "0")
+	local today = tonumber(os.date("%Y%m%d"))
 
-  if last_update < today then
-    vim.fn.writefile({ tostring(today) }, update_file)
-    return true
-  end
-  return false
+	if last_update < today then
+		vim.fn.writefile({ tostring(today) }, update_file)
+		return true
+	end
+	return false
 end
 
 -- Run `:Lazy update` only if needed
 vim.api.nvim_create_autocmd("VimEnter", {
-  callback = function()
-    if needs_update() then
-      vim.schedule(function()
-        -- Ensure Lazy.nvim is loaded before running update
-        require("lazy").update()
-      end)
-    end
-  end,
+	callback = function()
+		if needs_update() then
+			vim.schedule(function()
+				-- Ensure Lazy.nvim is loaded before running update
+				require("lazy").update()
+			end)
+		end
+	end,
 })
